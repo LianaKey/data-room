@@ -122,10 +122,71 @@ export function useFileOperations(
     }
   }
 
+  async function handleRename(
+    oldFileName: string,
+    newFileName: string,
+    isFolder: boolean,
+  ) {
+    if (!newFileName.trim() || oldFileName === newFileName) return;
+
+    try {
+      if (!userId) throw new Error("Not authenticated");
+      const basePath = currentPath
+        ? `${userId}/${roomId}/${currentPath}`
+        : `${userId}/${roomId}`;
+
+      if (isFolder) {
+        // Rename folder by moving all files
+        const oldFolderPath = `${basePath}/${oldFileName}`;
+        const newFolderPath = `${basePath}/${newFileName}`;
+
+        // List all files in the folder
+        const { data: folderFiles, error: listError } = await supabase.storage
+          .from("userimages-prod")
+          .list(oldFolderPath, {
+            limit: 1000,
+            sortBy: { column: "name", order: "asc" },
+          });
+
+        if (listError) throw listError;
+
+        if (folderFiles && folderFiles.length > 0) {
+          // Move each file to new folder
+          for (const file of folderFiles) {
+            const oldPath = `${oldFolderPath}/${file.name}`;
+            const newPath = `${newFolderPath}/${file.name}`;
+
+            const { error: moveError } = await supabase.storage
+              .from("userimages-prod")
+              .move(oldPath, newPath);
+
+            if (moveError) throw moveError;
+          }
+        }
+      } else {
+        // Rename file
+        const oldFilePath = `${basePath}/${oldFileName}`;
+        const newFilePath = `${basePath}/${newFileName}`;
+
+        const { error: moveError } = await supabase.storage
+          .from("userimages-prod")
+          .move(oldFilePath, newFilePath);
+
+        if (moveError) throw moveError;
+      }
+
+      await loadFiles();
+    } catch (err: unknown) {
+      console.error("Failed to rename:", err);
+      throw err;
+    }
+  }
+
   return {
     handleDelete,
     handleDeleteFolder,
     handleDownload,
     handleCreateFolder,
+    handleRename,
   };
 }

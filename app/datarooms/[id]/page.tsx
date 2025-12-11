@@ -55,6 +55,7 @@ export default function RoomPage({
     handleDeleteFolder,
     handleDownload,
     handleCreateFolder,
+    handleRename,
   } = useFileOperations(resolvedParams.id, currentPath, userId, loadFiles);
   const {
     selectedFiles,
@@ -161,7 +162,7 @@ export default function RoomPage({
     });
 
     for (const fileName of regularFiles) {
-      await onDownload(fileName);   
+      await onDownload(fileName);
     }
 
     for (const folderName of folders) {
@@ -182,6 +183,18 @@ export default function RoomPage({
     }
     clearSelection();
     setShowBulkMenu(false);
+  }
+
+  async function onRename(
+    oldName: string,
+    newName: string,
+    fileIsFolder: boolean,
+  ) {
+    try {
+      await handleRename(oldName, newName, fileIsFolder);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to rename");
+    }
   }
 
   return (
@@ -302,6 +315,7 @@ export default function RoomPage({
                 onDownload={onDownload}
                 onDelete={handleDelete}
                 onDeleteFolder={onDeleteFolder}
+                onRename={onRename}
                 isFolder={isFolder}
                 formatFileSize={formatFileSize}
               />

@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+
 interface FileItem {
   id: string;
   name: string;
@@ -20,6 +22,7 @@ interface FileTableProps {
   onDownload: (fileName: string) => void;
   onDelete: (fileName: string) => void;
   onDeleteFolder: (folderName: string) => void;
+  onRename: (oldName: string, newName: string, isFolder: boolean) => void;
   isFolder: (item: FileItem) => boolean;
   formatFileSize: (bytes?: number) => string;
 }
@@ -36,9 +39,39 @@ export function FileTable({
   onDownload,
   onDelete,
   onDeleteFolder,
+  onRename,
   isFolder,
   formatFileSize,
 }: FileTableProps) {
+  const [editingFile, setEditingFile] = useState<string | null>(null);
+  const [newName, setNewName] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingFile && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingFile]);
+
+  const handleStartRename = (fileName: string) => {
+    setEditingFile(fileName);
+    setNewName(fileName);
+  };
+
+  const handleCancelRename = () => {
+    setEditingFile(null);
+    setNewName("");
+  };
+
+  const handleSaveRename = (oldName: string, fileIsFolder: boolean) => {
+    if (newName.trim() && newName !== oldName) {
+      onRename(oldName, newName, fileIsFolder);
+    }
+    setEditingFile(null);
+    setNewName("");
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -95,6 +128,8 @@ export function FileTable({
         <tbody>
           {files.map((file) => {
             const fileIsFolder = isFolder(file);
+            const isEditing = editingFile === file.name;
+
             return (
               <tr
                 key={file.id}
@@ -111,19 +146,25 @@ export function FileTable({
                 </td>
                 <td
                   className={`py-3 px-4 font-medium ${
-                    fileIsFolder
+                    fileIsFolder && !isEditing
                       ? "text-blue-600 dark:text-blue-400 cursor-pointer hover:underline"
                       : "text-zinc-900 dark:text-zinc-100"
                   }`}
-                  onClick={() => fileIsFolder && onNavigateToFolder(file.name)}
+                  onClick={() =>
+                    !isEditing && fileIsFolder && onNavigateToFolder(file.name)
+                  }
                   onKeyDown={(e) => {
-                    if (fileIsFolder && (e.key === "Enter" || e.key === " ")) {
+                    if (
+                      !isEditing &&
+                      fileIsFolder &&
+                      (e.key === "Enter" || e.key === " ")
+                    ) {
                       e.preventDefault();
                       onNavigateToFolder(file.name);
                     }
                   }}
-                  role={fileIsFolder ? "button" : undefined}
-                  tabIndex={fileIsFolder ? 0 : undefined}
+                  role={fileIsFolder && !isEditing ? "button" : undefined}
+                  tabIndex={fileIsFolder && !isEditing ? 0 : undefined}
                 >
                   <span className="flex items-center gap-2">
                     {fileIsFolder ? (
@@ -151,7 +192,26 @@ export function FileTable({
                         />
                       </svg>
                     )}
-                    {file.name}
+                    {isEditing ? (
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        onBlur={() => handleSaveRename(file.name, fileIsFolder)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleSaveRename(file.name, fileIsFolder);
+                          } else if (e.key === "Escape") {
+                            handleCancelRename();
+                          }
+                        }}
+                        className="px-2 py-1 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    ) : (
+                      file.name
+                    )}
                   </span>
                 </td>
                 <td className="py-3 px-4 text-zinc-600 dark:text-zinc-400">
@@ -162,6 +222,13 @@ export function FileTable({
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleStartRename(file.name)}
+                      className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 font-medium"
+                    >
+                      Rename
+                    </button>
                     <button
                       type="button"
                       onClick={() => onDownload(file.name)}
