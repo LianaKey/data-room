@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 
 export default function Login() {
@@ -10,6 +11,14 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam === "verification_failed") {
+      setError("Email verification failed. Please try again or contact support.");
+    }
+  }, [searchParams]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();

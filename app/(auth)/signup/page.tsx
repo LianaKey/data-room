@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 
@@ -11,7 +10,6 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const router = useRouter();
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -23,6 +21,9 @@ export default function Signup() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
 
       if (error) throw error;
@@ -33,10 +34,8 @@ export default function Signup() {
           setError("This email is already registered. Please log in.");
         } else {
           setSuccess(true);
-          // Auto-login if no email confirmation required
-          setTimeout(() => {
-            router.push("/datarooms");
-          }, 2000);
+          // Show message about email confirmation
+          setError(null);
         }
       }
     } catch (err: unknown) {
@@ -60,7 +59,8 @@ export default function Signup() {
           )}
           {success && (
             <div className="bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg text-sm">
-              Account created successfully! Redirecting to data rooms...
+              Account created successfully! Please check your email to verify
+              your account.
             </div>
           )}
           <input

@@ -85,7 +85,15 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-4. **Run database migrations**
+4. **Configure Supabase Email Settings**
+
+In your Supabase project dashboard:
+- Go to **Authentication > URL Configuration**
+- Add your site URL (e.g., `http://localhost:3000` for development)
+- Add redirect URL: `http://localhost:3000/auth/callback`
+- For production, update to your production domain
+
+5. **Run database migrations**
 
 Apply the migrations to set up the database schema:
 
@@ -95,7 +103,7 @@ pnpm db:push
 
 Or manually run the SQL in `apply_to_production.sql` in your Supabase SQL Editor.
 
-5. **Start the development server**
+6. **Start the development server**
 
 ```bash
 pnpm dev
