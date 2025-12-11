@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { createRoom, getRooms } from "./actions";
 
 interface Room {
@@ -17,19 +17,19 @@ export default function Rooms() {
   const [success, setSuccess] = useState<string | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
   const router = useRouter();
-  // biome-ignore lint/correctness/useExhaustiveDependencies: loadRooms is stable
-  useEffect(() => {
-    loadRooms();
-  }, []);
 
-  async function loadRooms() {
+  const loadRooms = useEffectEvent(async () => {
     try {
       const data = await getRooms();
       setRooms(data || []);
     } catch (err: any) {
       console.error("Failed to load rooms:", err);
     }
-  }
+  });
+
+  useEffect(() => {
+    loadRooms();
+  }, [loadRooms]);
 
   async function handleCreateRoom(e: React.FormEvent) {
     e.preventDefault();
