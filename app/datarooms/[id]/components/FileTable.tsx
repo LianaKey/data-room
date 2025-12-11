@@ -1,17 +1,8 @@
+import type { FileObject } from "@supabase/storage-js";
 import { useEffect, useRef, useState } from "react";
 
-interface FileItem {
-  id: string;
-  name: string;
-  size?: number;
-  created_at?: string;
-  metadata?: {
-    mimetype?: string;
-  };
-}
-
 interface FileTableProps {
-  files: FileItem[];
+  files: FileObject[];
   selectedFiles: Set<string>;
   sortBy: "name" | "type" | "size";
   sortOrder: "asc" | "desc";
@@ -130,6 +121,7 @@ export function FileTable({
             const fileIsFolder = isFolder(file);
             const isEditing = editingFile === file.name;
 
+            console.log(file);
             return (
               <tr
                 key={file.id}
@@ -210,7 +202,22 @@ export function FileTable({
                         onClick={(e) => e.stopPropagation()}
                       />
                     ) : (
-                      file.name
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onDoubleClick={(e) => {
+                          e.stopPropagation();
+                          handleStartRename(file.name);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && e.detail === 0) {
+                            handleStartRename(file.name);
+                          }
+                        }}
+                        className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap max-w-[300px] inline-block"
+                      >
+                        {file.name}
+                      </span>
                     )}
                   </span>
                 </td>
@@ -218,7 +225,7 @@ export function FileTable({
                   {fileIsFolder ? "Folder" : "PDF"}
                 </td>
                 <td className="py-3 px-4 text-zinc-600 dark:text-zinc-400">
-                  {formatFileSize(file.size)}
+                  {formatFileSize(file.metadata?.size)}
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex gap-2">

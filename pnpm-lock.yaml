@@ -33,6 +33,9 @@ importers:
       '@biomejs/biome':
         specifier: 2.2.0
         version: 2.2.0
+      '@supabase/storage-js':
+        specifier: ^2.87.1
+        version: 2.87.1
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.1.17
@@ -369,6 +372,10 @@ packages:
 
   '@supabase/storage-js@2.87.0':
     resolution: {integrity: sha512-luTghajY3IrrKglP5bjf2/51ASg5xaZUALsZuzR23RmuMg4lc4pzq4TxEgnkLoUGDT7Ppr9+uSgvIhf1snXbAw==}
+    engines: {node: '>=20.0.0'}
+
+  '@supabase/storage-js@2.87.1':
+    resolution: {integrity: sha512-0Uc8tNV4yzkNNmp1inpXru0RB4a7ECq05G2S6BDvSpMxTxJrDVJ4vVDwyhqB8ZZ+O9+8prHaQYoByQeuDnwpFQ==}
     engines: {node: '>=20.0.0'}
 
   '@supabase/supabase-js@2.87.0':
@@ -1069,6 +1076,11 @@ snapshots:
       cookie: 1.1.1
 
   '@supabase/storage-js@2.87.0':
+    dependencies:
+      iceberg-js: 0.8.1
+      tslib: 2.8.1
+
+  '@supabase/storage-js@2.87.1':
     dependencies:
       iceberg-js: 0.8.1
       tslib: 2.8.1

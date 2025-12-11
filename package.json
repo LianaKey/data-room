@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
+    "@supabase/storage-js": "^2.87.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

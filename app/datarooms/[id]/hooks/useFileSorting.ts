@@ -1,20 +1,11 @@
+import type { FileObject } from "@supabase/storage-js";
 import { useState } from "react";
 
-interface FileItem {
-  id: string;
-  name: string;
-  size?: number;
-  created_at?: string;
-  metadata?: {
-    mimetype?: string;
-  };
-}
-
-function isFolder(item: FileItem): boolean {
+function isFolder(item: FileObject): boolean {
   return !item.metadata?.mimetype && item.name !== ".keep";
 }
 
-export function useFileSorting(files: FileItem[], itemsPerPage: number) {
+export function useFileSorting(files: FileObject[], itemsPerPage: number) {
   const [sortBy, setSortBy] = useState<"name" | "type" | "size">("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,8 +39,8 @@ export function useFileSorting(files: FileItem[], itemsPerPage: number) {
         const bType = bIsFolder ? "Folder" : "PDF";
         comparison = aType.localeCompare(bType);
       } else if (sortBy === "size") {
-        const aSize = a.size || 0;
-        const bSize = b.size || 0;
+        const aSize = a.metadata?.size || 0;
+        const bSize = b.metadata?.size || 0;
         comparison = aSize - bSize;
       }
 
