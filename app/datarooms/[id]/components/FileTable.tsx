@@ -14,7 +14,7 @@ interface FileTableProps {
   onDelete: (fileName: string) => void;
   onDeleteFolder: (folderName: string) => void;
   onRename: (oldName: string, newName: string, isFolder: boolean) => void;
-  isFolder: (item: FileItem) => boolean;
+  isFolder: (item: FileObject) => boolean;
   formatFileSize: (bytes?: number) => string;
 }
 

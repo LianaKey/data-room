@@ -1,17 +1,8 @@
+import type { FileObject } from "@supabase/storage-js";
 import JSZip from "jszip";
 import { supabase } from "@/lib/supabaseClient";
 
-interface FileItem {
-  id: string;
-  name: string;
-  size?: number;
-  created_at?: string;
-  metadata?: {
-    mimetype?: string;
-  };
-}
-
-function isFolder(item: FileItem): boolean {
+function isFolder(item: FileObject): boolean {
   return !item.metadata?.mimetype && item.name !== ".keep";
 }
 

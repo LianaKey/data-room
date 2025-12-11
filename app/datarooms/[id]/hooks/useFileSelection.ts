@@ -1,16 +1,7 @@
+import type { FileObject } from "@supabase/storage-js";
 import { useState } from "react";
 
-interface FileItem {
-  id: string;
-  name: string;
-  size?: number;
-  created_at?: string;
-  metadata?: {
-    mimetype?: string;
-  };
-}
-
-export function useFileSelection(files: FileItem[]) {
+export function useFileSelection(files: FileObject[]) {
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
 
   function toggleFileSelection(fileName: string) {

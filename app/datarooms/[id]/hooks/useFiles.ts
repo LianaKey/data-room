@@ -1,22 +1,13 @@
+import type { FileObject } from "@supabase/storage-js/dist/module/lib/types";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-
-interface FileItem {
-  id: string;
-  name: string;
-  size?: number;
-  created_at?: string;
-  metadata?: {
-    mimetype?: string;
-  };
-}
 
 export function useFiles(
   roomId: string,
   currentPath: string,
   userId: string | null,
 ) {
-  const [files, setFiles] = useState<FileItem[]>([]);
+  const [files, setFiles] = useState<FileObject[]>([]);
 
   const loadFiles = useCallback(async () => {
     if (!userId) return;
