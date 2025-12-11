@@ -1,36 +1,192 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Data Room
+
+A secure, modern file management system built with Next.js and Supabase for organizing and sharing PDF documents in dedicated data rooms.
+
+## Features
+
+- 🔐 **Authentication** - Secure user authentication with Supabase Auth
+- 📁 **Multi-Room Organization** - Create and manage multiple data rooms
+- 📂 **Folder Structure** - Organize files in nested folders
+- 📄 **PDF Upload** - Drag-and-drop or click to upload PDF files
+- 🔄 **File Management** - Rename, download, and delete files/folders
+- 📦 **Bulk Operations** - Select multiple files for batch download or delete
+- 🗜️ **Folder Download** - Download entire folders as ZIP archives
+- 🔍 **Sorting & Pagination** - Sort by name, type, or size with paginated views
+- 🎨 **Dark Mode** - Automatic dark/light theme support
+- 🔒 **Row Level Security** - User-scoped data access with Supabase RLS
+
+## Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org) (App Router)
+- **Language**: TypeScript
+- **Authentication**: [Supabase Auth](https://supabase.com/auth)
+- **Database**: [Supabase](https://supabase.com)
+- **Storage**: Supabase Storage
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com)
+- **Linting**: [Biome](https://biomejs.dev)
+- **Archive**: JSZip
+
+## Project Structure
+
+```
+data-room/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/          # Login page
+│   │   └── register/       # Registration page
+│   ├── datarooms/
+│   │   ├── [id]/
+│   │   │   ├── components/ # Reusable UI components
+│   │   │   ├── hooks/      # Custom React hooks
+│   │   │   ├── utils/      # Utility functions
+│   │   │   └── page.tsx    # Room detail page
+│   │   ├── actions.ts      # Server actions
+│   │   └── page.tsx        # Rooms list page
+│   ├── globals.css         # Global styles
+│   ├── layout.tsx          # Root layout
+│   └── page.tsx            # Home page
+├── lib/
+│   ├── supabaseClient.ts   # Browser Supabase client
+│   └── supabaseServer.ts   # Server Supabase client
+├── middleware.ts           # Auth middleware
+└── supabase/
+    └── migrations/         # Database migrations
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- pnpm (or npm/yarn)
+- Supabase account
+
+### Installation
+
+1. **Clone the repository**
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/LianaKey/data-room.git
+cd data-room
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Install dependencies**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. **Set up environment variables**
 
-## Learn More
+Create a `.env.local` file in the root directory:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. **Run database migrations**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Apply the migrations to set up the database schema:
 
-## Deploy on Vercel
+```bash
+pnpm db:push
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Or manually run the SQL in `apply_to_production.sql` in your Supabase SQL Editor.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. **Start the development server**
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Database Schema
+
+### Tables
+
+**datarooms**
+- `id` (uuid, primary key)
+- `name` (text)
+- `user_id` (uuid, foreign key to auth.users)
+- `created_at` (timestamp)
+
+### Storage
+
+**Bucket**: `userimages-prod`
+- Structure: `{user_id}/{room_id}/{path}/{filename}`
+- RLS policies enforce user-scoped access
+
+## Available Scripts
+
+```bash
+pnpm dev          # Start development server
+pnpm build        # Build for production
+pnpm start        # Start production server
+pnpm lint         # Run Biome linter
+pnpm format       # Format code with Biome
+pnpm db:push      # Push database migrations
+```
+
+## Key Components
+
+### Custom Hooks
+
+- `useAuth` - Manages user authentication state
+- `useFiles` - Loads and manages file listings
+- `useRoom` - Fetches room metadata
+- `useFileUpload` - Handles file upload with validation
+- `useFileOperations` - CRUD operations for files/folders
+- `useZipDownload` - Generates ZIP archives for folder downloads
+- `useFileSelection` - Manages bulk file selection
+- `useFileSorting` - Sorting and pagination logic
+
+### UI Components
+
+- `RoomHeader` - Room title and navigation
+- `ErrorDisplay` - Error message display
+- `ActionToolbar` - Upload, create folder, bulk actions
+- `CreateFolderForm` - Folder creation form
+- `DropZone` - Drag-and-drop upload area
+- `FileTable` - Sortable file/folder table with inline rename
+- `Pagination` - Page navigation controls
+- `EmptyState` - Empty folder message
+
+## Security
+
+- **Row Level Security (RLS)** - All database queries are scoped to authenticated users
+- **User-scoped storage** - Files are organized by user ID and protected by storage policies
+- **Server-side validation** - File uploads and operations validated on the server
+- **Authentication middleware** - Protected routes require valid session
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Import project in [Vercel](https://vercel.com)
+3. Add environment variables
+4. Deploy
+
+### Environment Variables for Production
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built with [Next.js](https://nextjs.org)
+- Powered by [Supabase](https://supabase.com)
+- Styled with [Tailwind CSS](https://tailwindcss.com)
