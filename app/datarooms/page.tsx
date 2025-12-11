@@ -17,7 +17,7 @@ export default function Rooms() {
   const [success, setSuccess] = useState<string | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
   const router = useRouter();
-
+  // biome-ignore lint/correctness/useExhaustiveDependencies: loadRooms is stable
   useEffect(() => {
     loadRooms();
   }, []);
@@ -26,7 +26,7 @@ export default function Rooms() {
     try {
       const data = await getRooms();
       setRooms(data || []);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to load rooms:", err);
     }
   }
@@ -41,7 +41,7 @@ export default function Rooms() {
       setSuccess("Room created successfully!");
       setRoomName("");
       await loadRooms();
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || "Failed to create room");
     } finally {
       setLoading(false);

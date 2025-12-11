@@ -164,6 +164,7 @@ export default function FeaturesPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, idx) => (
               <div
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static array with stable order
                 key={`feature-${idx}`}
                 className="bg-white dark:bg-zinc-900 rounded-xl p-8 shadow-lg border border-zinc-200 dark:border-zinc-700 hover:shadow-xl transition-all hover:-translate-y-1"
               >
@@ -191,6 +192,7 @@ export default function FeaturesPage() {
           <div className="grid md:grid-cols-2 gap-8">
             {benefits.map((benefit, idx) => (
               <div
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static array with stable order
                 key={`benefit-${idx}`}
                 className="bg-white dark:bg-zinc-900 rounded-xl p-8 shadow-lg border border-zinc-200 dark:border-zinc-700 hover:shadow-xl transition-all"
               >
@@ -218,6 +220,7 @@ export default function FeaturesPage() {
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {plans.map((plan, idx) => (
               <div
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static array with stable order
                 key={`plan-${idx}`}
                 className={`rounded-2xl p-8 shadow-xl border-2 transition-all hover:shadow-2xl hover:-translate-y-1 ${
                   plan.popular
@@ -245,9 +248,9 @@ export default function FeaturesPage() {
                   {plan.description}
                 </p>
                 <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, fIdx) => (
+                  {plan.features.map((feature) => (
                     <li
-                      key={`plan-${idx}-feature-${fIdx}`}
+                      key={`${plan.name}-${feature}`}
                       className="flex items-start gap-2"
                     >
                       <span className="text-green-600 dark:text-green-400 text-xl">

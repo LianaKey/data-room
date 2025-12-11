@@ -110,6 +110,7 @@ export default function SecurityPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
           {stats.map((stat, index) => (
             <div
+              // biome-ignore lint/suspicious/noArrayIndexKey: Static array with stable order
               key={index}
               className="bg-white dark:bg-zinc-900 rounded-xl p-6 text-center shadow-lg border border-zinc-200 dark:border-zinc-700"
             >
@@ -131,6 +132,7 @@ export default function SecurityPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <div
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static array with stable order
                 key={index}
                 className="bg-white dark:bg-zinc-900 rounded-xl p-8 shadow-lg border border-zinc-200 dark:border-zinc-700 hover:shadow-xl transition-all hover:-translate-y-1"
               >
@@ -158,6 +160,7 @@ export default function SecurityPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
               <div
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static array with stable order
                 key={index}
                 className="bg-white dark:bg-zinc-900 rounded-xl p-8 shadow-lg border border-zinc-200 dark:border-zinc-700 hover:shadow-xl transition-all"
               >
@@ -177,6 +180,7 @@ export default function SecurityPage() {
                 </div>
                 <div className="flex mb-3">
                   {[...Array(testimonial.rating)].map((_, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: Static array with stable order
                     <span key={i} className="text-yellow-500 text-xl">
                       ★
                     </span>
