@@ -32,19 +32,39 @@ export function useFileOperations(
         : `${userId}/${roomId}`;
       const folderPath = `${basePath}/${folderName}`;
 
-      const { data: folderFiles, error: listError } = await supabase.storage
-        .from("userimages-prod")
-        .list(folderPath, {
-          limit: 1000,
-          sortBy: { column: "name", order: "asc" },
-        });
+      // Recursively get all files in folder and subfolders
+      async function getAllFilesRecursively(path: string): Promise<string[]> {
+        const allFiles: string[] = [];
 
-      if (listError) throw listError;
+        const { data: items, error: listError } = await supabase.storage
+          .from("userimages-prod")
+          .list(path, {
+            limit: 1000,
+            sortBy: { column: "name", order: "asc" },
+          });
 
-      if (folderFiles && folderFiles.length > 0) {
-        const filesToDelete = folderFiles.map(
-          (file) => `${folderPath}/${file.name}`,
-        );
+        if (listError) throw listError;
+
+        if (items && items.length > 0) {
+          for (const item of items) {
+            const itemPath = `${path}/${item.name}`;
+
+            if (!item.metadata?.mimetype || item.id === item.name) {
+              const subFiles = await getAllFilesRecursively(itemPath);
+              allFiles.push(...subFiles);
+            } else {
+              allFiles.push(itemPath);
+            }
+          }
+        }
+
+        return allFiles;
+      }
+
+      // Get all files recursively
+      const filesToDelete = await getAllFilesRecursively(folderPath);
+
+      if (filesToDelete.length > 0) {
         const { error: deleteError } = await supabase.storage
           .from("userimages-prod")
           .remove(filesToDelete);
