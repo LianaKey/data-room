@@ -36,12 +36,14 @@ export default function RoomPage({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const loadFiles = useCallback(async () => {
+    if (!userId) return;
     try {
       const path = currentPath
-        ? `${resolvedParams.id}/${currentPath}`
-        : resolvedParams.id;
+        ? `${userId}/${resolvedParams.id}/${currentPath}`
+        : `${userId}/${resolvedParams.id}`;
       const { data, error } = await supabase.storage
         .from("userimages-prod")
         .list(path);
@@ -51,7 +53,17 @@ export default function RoomPage({
     } catch (err: unknown) {
       console.error("Failed to load files:", err);
     }
-  }, [currentPath, resolvedParams.id]);
+  }, [currentPath, resolvedParams.id, userId]);
+
+  useEffect(() => {
+    async function fetchUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) setUserId(user.id);
+    }
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     loadFiles();
@@ -86,10 +98,11 @@ export default function RoomPage({
     setError(null);
 
     try {
+      if (!userId) throw new Error("Not authenticated");
       const fileName = `${Date.now()}_${file.name}`;
       const basePath = currentPath
-        ? `${resolvedParams.id}/${currentPath}`
-        : resolvedParams.id;
+        ? `${userId}/${resolvedParams.id}/${currentPath}`
+        : `${userId}/${resolvedParams.id}`;
       const filePath = `${basePath}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -143,9 +156,10 @@ export default function RoomPage({
 
   async function handleDelete(fileName: string) {
     try {
+      if (!userId) throw new Error("Not authenticated");
       const basePath = currentPath
-        ? `${resolvedParams.id}/${currentPath}`
-        : resolvedParams.id;
+        ? `${userId}/${resolvedParams.id}/${currentPath}`
+        : `${userId}/${resolvedParams.id}`;
       const filePath = `${basePath}/${fileName}`;
       const { error } = await supabase.storage
         .from("userimages-prod")
@@ -160,9 +174,10 @@ export default function RoomPage({
 
   async function handleDeleteFolder(folderName: string) {
     try {
+      if (!userId) throw new Error("Not authenticated");
       const basePath = currentPath
-        ? `${resolvedParams.id}/${currentPath}`
-        : resolvedParams.id;
+        ? `${userId}/${resolvedParams.id}/${currentPath}`
+        : `${userId}/${resolvedParams.id}`;
       const folderPath = `${basePath}/${folderName}`;
 
       // List all files in the folder recursively
@@ -196,6 +211,7 @@ export default function RoomPage({
 
   async function handleDownload(fileName: string) {
     try {
+      if (!userId) throw new Error("Not authenticated");
       const file = files.find((f) => f.name === fileName);
       if (file && isFolder(file)) {
         // Download folder as zip
@@ -205,8 +221,8 @@ export default function RoomPage({
 
       // Download regular file
       const basePath = currentPath
-        ? `${resolvedParams.id}/${currentPath}`
-        : resolvedParams.id;
+        ? `${userId}/${resolvedParams.id}/${currentPath}`
+        : `${userId}/${resolvedParams.id}`;
       const filePath = `${basePath}/${fileName}`;
 
       const { data, error } = await supabase.storage
@@ -235,9 +251,10 @@ export default function RoomPage({
     if (!folderName.trim()) return;
 
     try {
+      if (!userId) throw new Error("Not authenticated");
       const basePath = currentPath
-        ? `${resolvedParams.id}/${currentPath}`
-        : resolvedParams.id;
+        ? `${userId}/${resolvedParams.id}/${currentPath}`
+        : `${userId}/${resolvedParams.id}`;
       const folderPath = `${basePath}/${folderName}/.keep`;
 
       const { error } = await supabase.storage
@@ -409,9 +426,10 @@ export default function RoomPage({
     folderName: string,
     zipPath: string,
   ) {
+    if (!userId) throw new Error("Not authenticated");
     const path = currentPath
-      ? `${resolvedParams.id}/${currentPath}/${folderName}`
-      : `${resolvedParams.id}/${folderName}`;
+      ? `${userId}/${resolvedParams.id}/${currentPath}/${folderName}`
+      : `${userId}/${resolvedParams.id}/${folderName}`;
 
     // List all items in this folder
     const { data: items, error } = await supabase.storage
@@ -433,8 +451,8 @@ export default function RoomPage({
       } else {
         // Download and add file to zip
         const filePath = currentPath
-          ? `${resolvedParams.id}/${currentPath}/${folderName}/${item.name}`
-          : `${resolvedParams.id}/${folderName}/${item.name}`;
+          ? `${userId}/${resolvedParams.id}/${currentPath}/${folderName}/${item.name}`
+          : `${userId}/${resolvedParams.id}/${folderName}/${item.name}`;
 
         const { data, error: downloadError } = await supabase.storage
           .from("userimages-prod")

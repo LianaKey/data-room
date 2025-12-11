@@ -28,7 +28,6 @@ export async function middleware(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  console.log("user", user);
   // If user is not signed in and trying to access protected routes, redirect to login
   if (!user && req.nextUrl.pathname.startsWith("/datarooms")) {
     const redirectUrl = req.nextUrl.clone();
