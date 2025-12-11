@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useState } from "react";
 import { createRoom, getRooms } from "./actions";
 
 interface Room {
@@ -18,14 +18,14 @@ export default function Rooms() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const router = useRouter();
 
-  const loadRooms = useEffectEvent(async () => {
+  const loadRooms = useCallback(async () => {
     try {
       const data = await getRooms();
       setRooms(data || []);
     } catch (err: any) {
       console.error("Failed to load rooms:", err);
     }
-  });
+  }, []);
 
   useEffect(() => {
     loadRooms();
