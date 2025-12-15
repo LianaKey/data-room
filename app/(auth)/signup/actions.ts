@@ -2,7 +2,9 @@
 
 import { createAdminSupabaseClient } from "@/lib/supabaseServer";
 
-export async function checkUserExists(email: string): Promise<boolean> {
+export async function checkUserExists(
+  email: string,
+): Promise<boolean | string> {
   try {
     const supabase = createAdminSupabaseClient();
 
@@ -10,7 +12,6 @@ export async function checkUserExists(email: string): Promise<boolean> {
     const { data, error } = await supabase.auth.admin.listUsers();
 
     if (error) {
-      console.error("Error checking user existence:", error);
       return false;
     }
 
@@ -19,9 +20,8 @@ export async function checkUserExists(email: string): Promise<boolean> {
       (user) => user.email?.toLowerCase() === email.toLowerCase(),
     );
 
-    return userExists;
+    return userExists ? "Something went wrong. Please try again later." : false;
   } catch (error) {
-    console.error("Error in checkUserExists:", error);
     return false;
   }
 }
