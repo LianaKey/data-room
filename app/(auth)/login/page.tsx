@@ -11,13 +11,20 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const errorParam = searchParams.get("error");
+
     if (errorParam === "verification_failed") {
       setError(
         "Email verification failed. Please try again or contact support.",
+      );
+    } else if (errorParam === "email_not_verified") {
+      setError(
+        "Please verify your email address before accessing data rooms. Check your inbox for the verification link.",
       );
     }
   }, [searchParams]);
@@ -29,7 +36,7 @@ function LoginForm() {
     setSuccess(false);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const {   data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -44,9 +51,54 @@ function LoginForm() {
         }, 1500);
       }
     } catch (err: unknown) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "code" in err &&
+        err.code === "email_not_confirmed"
+      ) {
+        setError(
+          "Your email is not verified. Please check your inbox for the verification link.",
+        );
+        return;
+      }
       setError(err instanceof Error ? err.message : "Failed to log in");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleResendVerification() {
+    if (!email) {
+      setError("Please enter your email address to resend verification link.");
+      return;
+    }
+
+    setResendLoading(true);
+    setResendSuccess(false);
+    setError(null);
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) throw error;
+
+      setResendSuccess(true);
+      setError(null);
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to resend verification email",
+      );
+    } finally {
+      setResendLoading(false);
     }
   }
 
@@ -58,7 +110,23 @@ function LoginForm() {
       <form onSubmit={handleLogin} className="flex flex-col gap-4">
         {error && (
           <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
-            {error}
+            {error} &nbsp;
+            {(error.includes("not verified") ||
+              error.includes("email_not_confirmed")) && (
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={resendLoading}
+                className="mt-2 text-sm underline hover:no-underline disabled:opacity-50"
+              >
+                {resendLoading ? "Sending..." : "Resend verification email"}
+              </button>
+            )}
+          </div>
+        )}
+        {resendSuccess && (
+          <div className="bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg text-sm">
+            Verification email sent! Please check your inbox.
           </div>
         )}
         {success && (

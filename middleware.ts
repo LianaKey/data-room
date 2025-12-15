@@ -36,6 +36,19 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  // If user is signed in but email is not confirmed, redirect to login with message
+  if (
+    user &&
+    !user.email_confirmed_at &&
+    req.nextUrl.pathname.startsWith("/datarooms")
+  ) {
+    console.log(user, "email_not_verified");
+    const redirectUrl = req.nextUrl.clone();
+    redirectUrl.pathname = "/login";
+    redirectUrl.searchParams.set("error", "email_not_verified");
+    return NextResponse.redirect(redirectUrl);
+  }
+
   // If user is signed in and trying to access auth pages, redirect to datarooms
   if (
     user &&

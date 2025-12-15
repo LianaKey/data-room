@@ -14,7 +14,7 @@ interface FileTableProps {
   onDelete: (fileName: string) => void;
   onDeleteFolder: (folderName: string) => void;
   onRename: (oldName: string, newName: string, isFolder: boolean) => void;
-  isFolder: (item: FileObject) => boolean;
+      isFolder: (item: FileObject) => boolean;
   formatFileSize: (bytes?: number) => string;
 }
 
@@ -202,8 +202,8 @@ export function FileTable({
                         onClick={(e) => e.stopPropagation()}
                       />
                     ) : (
-                      <span
-                        role="button"
+                      <button
+                        type="button"
                         tabIndex={0}
                         onDoubleClick={(e) => {
                           e.stopPropagation();
@@ -217,7 +217,7 @@ export function FileTable({
                         className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap max-w-[300px] inline-block"
                       >
                         {file.name}
-                      </span>
+                      </button>
                     )}
                   </span>
                 </td>
