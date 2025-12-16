@@ -12,6 +12,8 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
+      console.error("Error exchanging code for session:", error.message);
+      console.error("Error exchanging code for session code:", error.code);
       return NextResponse.redirect(
         new URL("/login?error=verification_failed", requestUrl.origin),
       );
