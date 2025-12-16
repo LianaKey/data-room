@@ -36,7 +36,7 @@ function LoginForm() {
     setSuccess(false);
 
     try {
-      const {   data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -86,7 +86,6 @@ function LoginForm() {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-
       if (error) throw error;
 
       setResendSuccess(true);
