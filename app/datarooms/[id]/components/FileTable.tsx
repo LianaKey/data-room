@@ -14,7 +14,7 @@ interface FileTableProps {
   onDelete: (fileName: string) => void;
   onDeleteFolder: (folderName: string) => void;
   onRename: (oldName: string, newName: string, isFolder: boolean) => void;
-      isFolder: (item: FileObject) => boolean;
+  isFolder: (item: FileObject) => boolean;
   formatFileSize: (bytes?: number) => string;
 }
 
@@ -72,9 +72,10 @@ export function FileTable({
               <input
                 type="checkbox"
                 checked={
-                  selectedFiles.size > 0 &&
-                  selectedFiles.size ===
-                    files.filter((f) => f.name !== ".keep").length
+                  files.filter((f) => f.name !== ".keep").length > 0 &&
+                  files
+                    .filter((f) => f.name !== ".keep")
+                    .every((f) => selectedFiles.has(f.name))
                 }
                 onChange={onSelectAll}
                 className="cursor-pointer"

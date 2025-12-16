@@ -1,7 +1,7 @@
 import type { FileObject } from "@supabase/storage-js";
 import { useState } from "react";
 
-export function useFileSelection(files: FileObject[]) {
+export function useFileSelection() {
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
 
   function toggleFileSelection(fileName: string) {
@@ -16,12 +16,26 @@ export function useFileSelection(files: FileObject[]) {
     });
   }
 
-  function toggleSelectAll() {
-    const visibleFiles = files.filter((f) => f.name !== ".keep");
-    if (selectedFiles.size === visibleFiles.length) {
-      setSelectedFiles(new Set());
+  function toggleSelectAll(currentPageFiles: FileObject[]) {
+    const visibleFiles = currentPageFiles.filter((f) => f.name !== ".keep");
+    const allCurrentPageSelected = visibleFiles.every((f) =>
+      selectedFiles.has(f.name),
+    );
+
+    if (allCurrentPageSelected && visibleFiles.length > 0) {
+      // Deselect all files on current page
+      setSelectedFiles((prev) => {
+        const newSet = new Set(prev);
+        visibleFiles.forEach((f) => newSet.delete(f.name));
+        return newSet;
+      });
     } else {
-      setSelectedFiles(new Set(visibleFiles.map((f) => f.name)));
+      // Select all files on current page
+      setSelectedFiles((prev) => {
+        const newSet = new Set(prev);
+        visibleFiles.forEach((f) => newSet.add(f.name));
+        return newSet;
+      });
     }
   }
 
@@ -29,10 +43,19 @@ export function useFileSelection(files: FileObject[]) {
     setSelectedFiles(new Set());
   }
 
+  function removeFromSelection(fileName: string) {
+    setSelectedFiles((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(fileName);
+      return newSet;
+    });
+  }
+
   return {
     selectedFiles,
     toggleFileSelection,
     toggleSelectAll,
     clearSelection,
+    removeFromSelection,
   };
 }

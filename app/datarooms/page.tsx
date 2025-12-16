@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { createRoom, getRooms } from "./actions";
+import { createRoom, deleteRoom, getRooms } from "./actions";
 
 interface Room {
   id: string;
@@ -16,6 +16,7 @@ export default function Rooms() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [deletingRoomId, setDeletingRoomId] = useState<string | null>(null);
   const router = useRouter();
 
   const loadRooms = useCallback(async () => {
@@ -45,6 +46,29 @@ export default function Rooms() {
       setError(err.message || "Failed to create room");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDeleteRoom(roomId: string, roomName: string) {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${roomName}"? This action cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    setDeletingRoomId(roomId);
+    setError(null);
+    setSuccess(null);
+    try {
+      await deleteRoom(roomId);
+      setSuccess("Room deleted successfully!");
+      await loadRooms();
+    } catch (err: any) {
+      setError(err.message || "Failed to delete room");
+    } finally {
+      setDeletingRoomId(null);
     }
   }
 
@@ -96,13 +120,12 @@ export default function Rooms() {
             ) : (
               rooms.map((room) => (
                 <li key={room.id}>
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/datarooms/${room.id}`)}
-                    onDoubleClick={() => router.push(`/datarooms/${room.id}`)}
-                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 p-5 flex justify-between items-center bg-zinc-50 dark:bg-zinc-800 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-left group"
-                  >
-                    <div className="flex items-center gap-4 flex-1">
+                  <div className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 p-5 flex justify-between items-center bg-zinc-50 dark:bg-zinc-800 hover:shadow-md transition-all group">
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/datarooms/${room.id}`)}
+                      className="flex items-center gap-4 flex-1 cursor-pointer hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:rounded-lg transition-all text-left"
+                    >
                       <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900 group-hover:bg-blue-200 dark:group-hover:bg-blue-800 transition">
                         <svg
                           width="28"
@@ -127,11 +150,48 @@ export default function Rooms() {
                           Click to open room
                         </span>
                       </div>
+                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/datarooms/${room.id}`)}
+                        className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition shadow-sm"
+                      >
+                        Join →
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteRoom(room.id, room.name);
+                        }}
+                        disabled={deletingRoomId === room.id}
+                        className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-700 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Delete room"
+                      >
+                        {deletingRoomId === room.id ? (
+                          "Deleting..."
+                        ) : (
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <title>Delete</title>
+                            <path
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </button>
                     </div>
-                    <span className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white group-hover:bg-blue-700 transition shadow-sm">
-                      Join →
-                    </span>
-                  </button>
+                  </div>
                 </li>
               ))
             )}

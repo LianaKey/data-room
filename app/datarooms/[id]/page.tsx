@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import {
   ActionToolbar,
   CreateFolderForm,
@@ -62,7 +62,8 @@ export default function RoomPage({
     toggleFileSelection,
     toggleSelectAll,
     clearSelection,
-  } = useFileSelection(files);
+    removeFromSelection,
+  } = useFileSelection();
   const {
     sortBy,
     sortOrder,
@@ -71,6 +72,11 @@ export default function RoomPage({
     handleSort,
     getSortedAndPaginatedFiles,
   } = useFileSorting(files, itemsPerPage);
+
+  // Clear selections when navigating to different folders or page changes
+  useEffect(() => {
+    clearSelection();
+  }, [currentPage, clearSelection]);
 
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -132,8 +138,18 @@ export default function RoomPage({
   async function onDeleteFolder(folderName: string) {
     try {
       await handleDeleteFolder(folderName);
+      removeFromSelection(folderName);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to delete folder");
+    }
+  }
+
+  async function onDelete(fileName: string) {
+    try {
+      await handleDelete(fileName);
+      removeFromSelection(fileName);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to delete file");
     }
   }
 
@@ -308,12 +324,14 @@ export default function RoomPage({
                 selectedFiles={selectedFiles}
                 sortBy={sortBy}
                 sortOrder={sortOrder}
-                onSelectAll={toggleSelectAll}
+                onSelectAll={() =>
+                  toggleSelectAll(getSortedAndPaginatedFiles().paginatedFiles)
+                }
                 onSelectFile={toggleFileSelection}
                 onSort={handleSort}
                 onNavigateToFolder={navigateToFolder}
                 onDownload={onDownload}
-                onDelete={handleDelete}
+                onDelete={onDelete}
                 onDeleteFolder={onDeleteFolder}
                 onRename={onRename}
                 isFolder={isFolder}

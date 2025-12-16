@@ -34,10 +34,6 @@ export function useFileSorting(files: FileObject[], itemsPerPage: number) {
 
       if (sortBy === "name") {
         comparison = a.name.localeCompare(b.name);
-      } else if (sortBy === "type") {
-        const aType = aIsFolder ? "Folder" : "PDF";
-        const bType = bIsFolder ? "Folder" : "PDF";
-        comparison = aType.localeCompare(bType);
       } else if (sortBy === "size") {
         const aSize = a.metadata?.size || 0;
         const bSize = b.metadata?.size || 0;
