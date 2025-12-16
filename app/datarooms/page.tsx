@@ -37,16 +37,17 @@ export default function Rooms() {
     setLoading(true);
     setError(null);
     setSuccess(null);
-    try {
-      await createRoom(roomName);
+
+    const { error } = await createRoom(roomName);
+
+    if (error) {
+      setError(error);
+    } else {
       setSuccess("Room created successfully!");
       setRoomName("");
       await loadRooms();
-    } catch (err: any) {
-      setError(err.message || "Failed to create room");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   }
 
   async function handleDeleteRoom(roomId: string, roomName: string) {

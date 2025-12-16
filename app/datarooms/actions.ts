@@ -9,7 +9,7 @@ export async function createRoom(roomName: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Not authenticated");
+    return { success: false, error: "Not authenticated." };
   }
 
   // Check if a room with the same name already exists for this user
@@ -21,7 +21,7 @@ export async function createRoom(roomName: string) {
     .single();
 
   if (existingRoom) {
-    throw new Error("A room with this name already exists");
+    return { success: false, error: "Room with this name already exists." };
   }
 
   const { data, error } = await supabase
@@ -29,8 +29,14 @@ export async function createRoom(roomName: string) {
     .insert([{ name: roomName, user_id: user.id }])
     .select();
 
-  if (error) throw error;
-  return data;
+  if (error) {
+    return {
+      success: false,
+      error: "Something went wrong while creating the room.",
+    };
+  }
+
+  return { success: true, room: data?.[0] };
 }
 
 export async function getRooms() {
